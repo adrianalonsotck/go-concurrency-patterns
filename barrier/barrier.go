@@ -20,23 +20,23 @@ var endpoints = []string{
 	"https://jsonplaceholder.typicode.com/posts/10",
 }
 
-type barrierResp struct {
+type BarrierResp struct {
 	Err  error
 	Resp string
 }
 
 func main() {
-	barrier(endpoints)
+	responses := barrier(endpoints)
+	fmt.Println(responses)
 }
 
-func barrier(endpoints []string) {
-	time1 := time.Now()
+func barrier(endpoints []string) []BarrierResp {
 
 	requestNumber := len(endpoints)
-	in := make(chan barrierResp, requestNumber)
+	in := make(chan BarrierResp, requestNumber)
 	defer close(in)
 
-	responses := make([]barrierResp, requestNumber)
+	responses := make([]BarrierResp, requestNumber)
 	for _, endpoint := range endpoints {
 		go makeRequest(in, endpoint)
 	}
@@ -56,19 +56,12 @@ func barrier(endpoints []string) {
 		}
 	}
 
-	time2 := time.Now()
-	diff := delta(time1, time2)
-	fmt.Println("Difference on seconds:", diff.Seconds())
+	return responses
 
 }
 
-func delta(time1, time2 time.Time) time.Duration {
-	diferencia := time2.Sub(time1)
-	return diferencia
-}
-
-func makeRequest(out chan<- barrierResp, url string) {
-	res := barrierResp{}
+func makeRequest(out chan<- BarrierResp, url string) {
+	res := BarrierResp{}
 	client := http.Client{
 		Timeout: time.Duration(time.Duration(timeoutMilliseconds) *
 			time.Millisecond),
