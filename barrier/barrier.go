@@ -26,6 +26,11 @@ type BarrierResp struct {
 }
 
 func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Catch exception: ", r)
+		}
+	}()
 	responses := barrier(endpoints)
 	fmt.Println(responses)
 }
@@ -50,10 +55,9 @@ func barrier(endpoints []string) []BarrierResp {
 		}
 		responses[i] = resp
 	}
-	if !hasError {
-		for _, resp := range responses {
-			fmt.Println(resp.Resp)
-		}
+
+	if hasError {
+		panic("Invalid Response")
 	}
 
 	return responses
